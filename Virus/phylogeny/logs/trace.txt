@@ -1,0 +1,7 @@
+task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
+1	41/b56933	40603	_1_filter_eval_refbounds	COMPLETED	0	2024-08-27 11:58:44.204	28s	27s	530.7%	2.1 GB	5.5 GB	1.1 GB	51.6 MB
+2	7a/a1394d	3344	_2_dup_remove	COMPLETED	0	2024-08-27 11:59:12.304	3.1s	2.1s	219.5%	93.6 MB	3 GB	56.1 MB	5.7 MB
+3	53/e1b9d6	3552	_3_size_filter	COMPLETED	0	2024-08-27 11:59:15.410	36.4s	35.4s	115.2%	679.9 MB	1.3 GB	1.3 GB	626.9 MB
+4	28/5e6f47	5045	_4_analysis	COMPLETED	0	2024-08-27 11:59:51.865	9.7s	8.7s	617.5%	230.5 MB	3.5 GB	1.7 GB	653.2 KB
+5	b0/c7aaf4	5747	_5_alignment	COMPLETED	0	2024-08-27 12:00:36.375	1m 25s	1m 24s	369.3%	1.9 GB	112.5 GB	1.4 GB	250.4 MB
+6	a8/8dad0c	14719	_6_tree	COMPLETED	0	2024-08-27 12:02:45.741	2m 48s	2m 47s	564.0%	906.9 MB	3.2 GB	1.1 GB	139 MB

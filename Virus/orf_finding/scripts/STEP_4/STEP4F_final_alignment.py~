@@ -1,0 +1,54 @@
+﻿import os
+import sys
+import subprocess
+
+def create_output_dirs(output_aln_dir, temp_aln_dir):
+    os.makedirs(output_aln_dir, exist_ok=True)
+    os.makedirs(temp_aln_dir, exist_ok=True)
+
+def run_mmseqs(db_path, fasta_path, output_file, temp_file, num_threads=16):
+    """
+    Exécute la commande mmseqs easy-search pour les fichiers donnés avec le nombre de threads spécifié.
+    """
+    command = [
+        'mmseqs', 'easy-search',
+        fasta_path, db_path,
+        output_file, temp_file,
+        '--threads', str(num_threads)
+    ]
+    print(f"Executing: {' '.join(command)}")
+    subprocess.run(command, check=True)
+
+def main(db_dir, fasta_dir, output_aln_dir, temp_aln_dir):
+    # Create output directories
+    create_output_dirs(output_aln_dir, temp_aln_dir)
+    
+    for fasta_file in os.listdir(fasta_dir):
+        if fasta_file.endswith(".fasta"):
+            fasta_path = os.path.join(fasta_dir, fasta_file)
+            base_name = fasta_file.split(".fasta")[0]
+
+            # Extract base name to find corresponding database
+            db_key = "_".join(base_name.split("_")[:-1])
+            db_name = db_key.replace("_", "-")
+            db_path = os.path.join(db_dir, db_name, db_name + ".prt")
+
+            if os.path.exists(db_path):
+                output_file = os.path.join(output_aln_dir, f"{base_name}_filtered.m8")
+                temp_file = os.path.join(temp_aln_dir, f"{base_name}_filtered.tmp")
+
+                run_mmseqs(db_path, fasta_path, output_file, temp_file)
+            else:
+                print(f"Database path {db_path} does not exist for {fasta_file}")
+
+if __name__ == "__main__":
+    if len(sys.argv) != 5:
+        print("Usage: python script.py <db_dir> <fasta_dir> <output_aln_dir> <temp_aln_dir>")
+        sys.exit(1)
+    
+    db_dir = sys.argv[1]
+    fasta_dir = sys.argv[2]
+    output_aln_dir = sys.argv[3]
+    temp_aln_dir = sys.argv[4]
+    
+    main(db_dir, fasta_dir, output_aln_dir, temp_aln_dir)
