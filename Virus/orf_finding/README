@@ -1,0 +1,152 @@
+HOLOGREEN Virus ORF Finding Pipeline
+Table of Contents
+Introduction
+Pipeline Overview
+Step-by-Step Description
+STEP 1: ORF Prediction
+STEP 2: Sequence Alignment
+STEP 3: Alignment Processing
+STEP 4: ORF Filtering
+STEP 5: Final ORF Treatment
+Input Data Structure
+Output Data Structure
+Running the Pipeline
+Additional Notes
+Introduction
+This pipeline is designed to identify and process Open Reading Frames (ORFs) from viral genomes, with a specific focus on distinguishing between Polinton and non-Polinton ORFs. The pipeline performs a series of steps that include ORF prediction, sequence alignment, filtering, and final processing to generate a comprehensive set of ORFs categorized by their Polinton affiliation.
+
+Pipeline Overview
+The pipeline is composed of several scripts organized into five main steps:
+
+ORF Prediction: Identification of potential ORFs using tools like Prodigal and Miniprot.
+Sequence Alignment: Alignment of predicted ORFs against known databases to identify homologous sequences.
+Alignment Processing: Filtering and processing of alignment results to refine ORF predictions.
+ORF Filtering: Distinguishing between Polinton and non-Polinton ORFs based on alignment results.
+Final ORF Treatment: Final filtering and organization of ORF sequences and alignments, preparing them for downstream analysis.
+Step-by-Step Description
+STEP 1: ORF Prediction
+Scripts Involved:
+
+STEP1A_prodigal.py
+STEP1B_create_db.py
+STEP1B_blast_mmseqs.py
+STEP1C_process_alignments.py
+STEP1D_orf_prediction_miniprot.py
+STEP1E_extract_miniprot_results.py
+STEP1F_combined_orf.py
+Description:
+
+ORFs are predicted from viral genome sequences using Prodigal and Miniprot.
+The predicted ORFs are aligned against reference databases using BLAST or MMseqs to identify potential homologs.
+The alignments are processed to filter out low-confidence predictions, and the remaining ORFs are combined into a final set.
+STEP 2: Sequence Alignment
+Scripts Involved:
+
+This step is generally managed by the alignment scripts in STEP 1 but may involve further alignment scripts depending on specific requirements.
+Description:
+
+The predicted ORFs are aligned against viral protein databases to identify sequences with homology to known proteins.
+Alignments are performed using tools like BLAST, and the results are stored for further processing.
+STEP 3: Alignment Processing
+Scripts Involved:
+
+STEP1C_process_alignments.py
+Other scripts in STEP 1 as needed
+Description:
+
+The alignment results are processed to identify ORFs that are closely related to Polinton or non-Polinton sequences.
+ORFs are categorized based on their alignment scores and the presence of specific sequence motifs.
+STEP 4: ORF Filtering
+Scripts Involved:
+
+STEP1D_orf_prediction_miniprot.py
+STEP1E_extract_miniprot_results.py
+STEP1F_combined_orf.py
+Description:
+
+The ORFs are filtered based on their alignment results, with Polinton and non-Polinton sequences being separated into different categories.
+This filtering ensures that only high-confidence ORFs are retained for further analysis.
+STEP 5: Final ORF Treatment
+Scripts Involved:
+
+STEP5_final_treatment_orf.py
+Description:
+
+In this final step, the ORFs are subjected to a final round of filtering and renaming.
+ORFs are categorized as either Polinton or non-Polinton, and the results are organized into separate directories for easy access.
+The script also generates summary files that contain the final set of ORFs and their corresponding alignments.
+Input Data Structure
+The input data for the pipeline should be organized as follows:
+
+Viral Genome Sequences: These should be provided in FASTA format and should be placed in a directory named input_genomes.
+
+Reference Databases: The reference databases used for alignment (e.g., viral protein databases) should be placed in a directory named reference_db. These should be formatted appropriately for BLAST or MMseqs.
+
+Other Required Inputs:
+
+alignment_dir: Directory containing alignment results from earlier steps.
+orf_dir: Directory containing initial ORF predictions.
+dna_pol_aln_dir: Directory for DNA polymerase alignment results.
+dna_pol_seq_dir: Directory for DNA polymerase sequence results.
+polinto_orf_dir: Directory for Polinton-specific ORFs.
+polinto_aln_dir: Directory for Polinton-specific alignment results.
+Example Directory Structure
+markdown
+Copier le code
+input_genomes/
+    genome1.fasta
+    genome2.fasta
+reference_db/
+    viral_proteins.fasta
+    polinton_db.fasta
+alignment_dir/
+    alignment_results1.m8
+    alignment_results2.m8
+orf_dir/
+    orf_predictions1.fasta
+    orf_predictions2.fasta
+dna_pol_aln_dir/
+    dna_pol_alignment1.m8
+dna_pol_seq_dir/
+    dna_pol_sequences1.fasta
+polinto_orf_dir/
+    polinton_orf1.fasta
+polinto_aln_dir/
+    polinton_alignment1.m8
+Output Data Structure
+The pipeline generates output data organized into the following directories:
+
+output_aa_dir: Contains the final set of amino acid sequences for ORFs. These sequences are categorized and filtered, with filenames indicating whether they are Polinton or non-Polinton sequences.
+
+output_aln_dir: Contains the alignment results for the final set of ORFs. These files are similarly categorized and filtered.
+
+Example Output Directory Structure
+markdown
+Copier le code
+output_aa_dir/
+    genome1_polinto_filtered.fasta
+    genome2_nopolinto_filtered.fasta
+output_aln_dir/
+    genome1_polinto_filtered.m8
+    genome2_nopolinto_filtered.m8
+Running the Pipeline
+To run the pipeline, execute the following steps:
+
+Prepare the Input Data: Ensure that your input data is structured as described above. Place the genome sequences in input_genomes/ and reference databases in reference_db/.
+
+Execute the Pipeline Scripts: The pipeline is executed in a stepwise fashion, with each step being run in sequence. Start by running the scripts in STEP_1, then move to STEP_2, and so on.
+
+Example:
+
+bash
+Copier le code
+python scripts/STEP_1/STEP1A_prodigal.py
+python scripts/STEP_1/STEP1B_create_db.py
+...
+python scripts/STEP_5/STEP5_final_treatment_orf.py <output_aa_dir> <output_aln_dir> <alignment_dir> <orf_dir> <dna_pol_aln_dir> <dna_pol_seq_dir> <polinto_orf_dir> <polinto_aln_dir>
+Review the Outputs: After running the pipeline, review the contents of the output_aa_dir and output_aln_dir directories. These contain the final processed ORFs and their corresponding alignment files.
+
+Additional Notes
+The pipeline is highly configurable, and the filtering criteria for Polinton and non-Polinton ORFs can be adjusted by modifying the scripts in STEP_5.
+Ensure that all dependencies (e.g., Prodigal, BLAST, MMseqs) are correctly installed and accessible in your system's PATH.
+The pipeline expects input files to follow specific naming conventions. Deviations from these conventions may result in errors or misclassified ORFs.
