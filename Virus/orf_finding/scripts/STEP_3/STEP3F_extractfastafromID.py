@@ -3,11 +3,11 @@ import os
 from Bio import SeqIO
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-def extract_sequences_from_file(query_folder, ID_file, output_file):
-    # Nom de la file interroge
+def extract_sequences_from_file(fasta_file, ID_file, output_file):
+    # Nom du fichier ID (sans extension)
     base_name = os.path.splitext(os.path.basename(ID_file))[0]
 
-    # Set up la liste d'ID partiels
+    # Création d'une liste d'ID à partir du fichier donné
     ID_list = set()
     with open(ID_file) as ID:
         for line in ID:
@@ -15,29 +15,23 @@ def extract_sequences_from_file(query_folder, ID_file, output_file):
             if line != "":
                 ID_list.add(line)
 
-    # Set les potentielles sources de seq fasta
+    # Extraction des séquences correspondantes
     sequences_to_write = []
-    for file_sequence in os.listdir(query_folder):
-        fasta_file = os.path.join(query_folder, file_sequence)
+    with open(fasta_file, "r") as f:
+        fasta_sequences = SeqIO.parse(f, "fasta")
+        
+        # Boucle d'extraction des séquences qui correspondent aux IDs
+        for seq in fasta_sequences:
+            if seq.id in ID_list:
+                sequences_to_write.append(seq)
 
-        # Check if fasta_file is a file
-        if os.path.isfile(fasta_file):
-            # Convertir la file de sequences source en fasta format
-            fasta_sequences = SeqIO.parse(open(fasta_file), 'fasta')
-
-            # Boucle d'extraction des seqs
-            for seq in fasta_sequences:
-                # Vérifier si un ID partiel est contenu dans l'ID de la séquence
-                if any(partial_id in seq.id for partial_id in ID_list):
-                    sequences_to_write.append(seq)
-
-    # Écrire les séquences extraites dans le fichier de sortie
+    # Écriture des séquences extraites dans le fichier de sortie
     with open(output_file, "w") as out:
         SeqIO.write(sequences_to_write, out, "fasta")
 
     print(f"Extraction terminée pour {ID_file}, séquences écrites dans {output_file}")
 
-def extract_sequences_for_orfs(query_folder, ID_folder, out_seqs_folder, max_workers=None):
+def extract_sequences_for_orfs(fasta_file, ID_folder, out_seqs_folder, max_workers=None):
     os.makedirs(out_seqs_folder, exist_ok=True)
     
     tasks = []
@@ -45,22 +39,22 @@ def extract_sequences_for_orfs(query_folder, ID_folder, out_seqs_folder, max_wor
         for file_name in os.listdir(ID_folder):
             ID_file = os.path.join(ID_folder, file_name)
             
-            # Check if ID_file is a file
+            # Vérifier si ID_file est bien un fichier
             if os.path.isfile(ID_file):
-                output_file = os.path.join(out_seqs_folder, f"{os.path.splitext(file_name)[0]}_sequences.fasta")
-                tasks.append(executor.submit(extract_sequences_from_file, query_folder, ID_file, output_file))
+                output_file = os.path.join(out_seqs_folder, f"{os.path.splitext(file_name)[0]}.fasta")
+                tasks.append(executor.submit(extract_sequences_from_file, fasta_file, ID_file, output_file))
         
         for future in as_completed(tasks):
-            future.result()  # Pour lever les exceptions s'il y en a
+            future.result()  # Pour gérer les exceptions s'il y en a
 
 if __name__ == "__main__":
     # Vérifiez que le nombre d'arguments est correct
     if len(sys.argv) != 4:
-        print("Usage: python extractfastafromID.py <query_folder> <ID_folder> <out_seqs_folder>")
+        print("Usage: python extractfastafromID.py <fasta_file> <ID_folder> <out_seqs_folder>")
         sys.exit(1)
 
-    # Récupérer les chemins des dossiers en entrée
-    query_folder = sys.argv[1]
+    # Récupérer les chemins des fichiers en entrée
+    fasta_file = sys.argv[1]
     ID_folder = sys.argv[2]
     out_seqs_folder = sys.argv[3]
 
@@ -68,4 +62,4 @@ if __name__ == "__main__":
     num_workers = os.cpu_count()
 
     # Appeler la fonction pour extraire les séquences correspondantes aux IDs
-    extract_sequences_for_orfs(query_folder, ID_folder, out_seqs_folder, max_workers=num_workers)
+    extract_sequences_for_orfs(fasta_file, ID_folder, out_seqs_folder, max_workers=num_workers)

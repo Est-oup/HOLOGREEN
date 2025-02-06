@@ -23,18 +23,18 @@ log_folder = "${project_dir}/out/log"
 	  
     //miniprotsearch
 //Prediction ORF
-orf_folder = "${project_dir}/out/pred_orf/"
+orf_folder = "${project_dir}/out/1_Prediction_orf"
 orf_folder_log = "${orf_folder}/log"
 
     //Prodigalsearch
-prodigal_folder = "${project_dir}/out/pred_orf/prodigal"
+prodigal_folder = "${orf_folder}/prodigal"
 orfpred_prodigal_folder = "${prodigal_folder}/orf"
 orfpred_prodigal_folder_temp = "${prodigal_folder}/temp"
 
 
-//MIniprotsearch
+//Miniprotsearch
 //initialisation
-orf_miniprot_folder = "${project_dir}/out/pred_orf/miniprot"
+orf_miniprot_folder = "${orf_folder}/miniprot"
 orf_init_miniprot_fasta = "${orf_miniprot_folder}/orf_init_fasta"
 
 
@@ -56,26 +56,26 @@ orfpred_extracted_miniprot_log = "${orfpred_extracted_miniprot}/miniprot_orf_ext
 
 
     //general output of ORF reasearch
-orf_pred_file = "${project_dir}/out/pred_orf/unclustered_ORF"
-orf_pred_file_derep  = "${project_dir}/out/pred_orf/clustered_ORF"
+orf_pred_file = "${orf_folder}/unclustered_ORF"
+orf_pred_file_derep  = "${orf_folder}/clustered_ORF"
 
 
    	  //ETAPE 2: ALIGNEMENT PROTEIQUE GENERAL
 
     //Alignment folder
-alignment_folder = "${project_dir}/out/alignment"
-alignment_temp_folder = "${alignment_folder}/temp"
+alignement_general = "${project_dir}/out/2_General_alignment"
+ref_combined ="${alignement_general}/ref_combined"
+alignment_folder = "${alignement_general}/alignement"
+alignment_temp_folder = "${alignement_general}/alignement_temp"
+alignment_filt = "${alignement_general}/alignement_filt"
+alignment_filt_marker = "${alignement_general}/alignement_filt_marker"
+contigs_duplicated = "${alignement_general}/contigs_duplicated"
+orf_ids = "${alignement_general}/orf_ids"
 
-    //Info folder
-info_folder = "${alignment_folder}/info_alignment"
-info_folder_IDS = "${info_folder}/raw"
-info_folder_ID = "${info_folder}/dedup"
-info_folder_countdup = "${info_folder}/countdup"
-orf_codants_folder = "${info_folder}/orf_codants"
 
 
          //ETAPE 3: BACT DNA POL remove
-DNA_pol =  "${project_dir}/out/DNA_pol_thrim"
+DNA_pol =  "${project_dir}/out/3_DNA_pol_thrim"
 DNA_pol_fasta = "${DNA_pol}/fasta/"
 DNA_pol_fasta_db = "${DNA_pol}/db/"
 DNA_pol_files = "${DNA_pol}/DNA_pol_ORF/"
@@ -83,29 +83,16 @@ DNA_pol_align = "${DNA_pol}/alignement/aln"
 DNA_pol_align_temp = "${DNA_pol}/alignement/temp"
 DNA_pol_align_alnfilt = "${DNA_pol}/alignement/aln_filt"
 DNA_pol_align_alnfilt_ID = "${DNA_pol}/alignement/aln_filt_ID"
-DNA_pol_align_seqfilt = "${DNA_pol}/alignement/seq_filt"
 DNA_pol_align_final_aln = "${DNA_pol}/alignement/final_aln"
 DNA_pol_align_final_aln_temp = "${DNA_pol}/alignement/final_aln_temp"
 
 
 
-        //ETAPE 4: Polinton like thrim
-polinto = "${project_dir}/out/polinto"
-polinto_db = "${polinto}/db_ref"
-polinto_fasta = "${polinto}/fasta_ref"
-polinto_orf_init = "${polinto}/orf_init"
-polinto_aln = "${polinto}/aln"
-polinto_aln_temp = "${polinto}/aln_temp"
-polinto_aln_filt = "${polinto}/aln_filt"
-polinto_aln_filt_id = "${polinto}/aln_filt_id"
-polinto_aln_final = "${polinto}/aln_final"
-polinto_aln_final_temp = "${polinto}/aln_final_temp"
-polinto_orf_final = "${polinto}/orf_final"
 
 
         //ETAPE 5: Final treatment of folder
-alignment_final = "${project_dir}/out/out_final/alignments"
-orf_codants_final = "${project_dir}/out/out_final/orf_codants"
+alignment_final = "${project_dir}/out/5_out_final/alignments"
+orf_codants_final = "${project_dir}/out/out_final/"
 
 workflow {
 	 //ETAPE 1: Recherche d'ORF
@@ -134,13 +121,6 @@ workflow {
 	 //ETAPE 3: BACT DNA POL remove	 
     log_3 = _3_DNApolthrim(log_2)
 
-    	 //ETAPE 3: BACT DNA POL remove	 
-    log_4 = _4_polinto_thrim(log_3)
-
-	 //ETAPE 5: Files results treatment	 
-    log_5 = _5_final_treatment(log_4)
-
-
 }
 
 
@@ -149,7 +129,7 @@ workflow {
 
 //Etape 1A:
 process _1A_prodigalsearch {
-    conda 'bioconda::prodigal'
+    conda 'bioconda::prodigal conda-forge::biopython'
 
     output:
     path 'log_1A'
@@ -169,7 +149,7 @@ process _1A_prodigalsearch {
 
 
 process _1B_miniprotinit {
-    conda 'bioconda::mmseqs2'
+    conda 'bioconda::mmseqs2 conda-forge::biopython'
 
     input:
     path log_1A
@@ -209,6 +189,7 @@ process _1B_miniprotinit {
 
 //Etape 1C:
 process _1C_miniprotinit {
+    conda 'conda-forge::biopython'
 
     input:
     path log_1B
@@ -221,7 +202,7 @@ process _1C_miniprotinit {
     # Traitement des alignements
     mkdir -p "${miniprot_info_folder}"
     python "${project_dir}/scripts/STEP_1/STEP1C_process_alignments.py" ${miniprot_alignment_folder} ${miniprot_info_folder}
-    #
+    
     #log
     echo "log_1C: traitement des alignements ID terminé" >> "${log_folder}/log_STEP1"
     echo "log_1C: processus terminé" >> "${log_folder}/log_STEP1"
@@ -232,6 +213,8 @@ process _1C_miniprotinit {
 
 //Etape 1D:
 process _1D_miniprotsearch {
+    conda 'conda-forge::biopython'
+
     input:
     path log_1C
 
@@ -258,6 +241,8 @@ process _1D_miniprotsearch {
 
 // Extraction des résultats de Miniprot
 process _1E_extract_miniprot_results {
+    conda 'conda-forge::biopython'
+
     input:
     path log_1D
 
@@ -282,7 +267,7 @@ process _1E_extract_miniprot_results {
 
 //Etape 1F:
 process _1F_combinedorf {
-    conda 'bioconda::cd-hit'
+    conda 'bioconda::cd-hit conda-forge::biopython'
 
     input:
     path log_1E
@@ -308,7 +293,7 @@ process _1F_combinedorf {
 				
 //ETAPE 2:
 process _2_general_alignment {
-    conda 'bioconda::mmseqs2'
+    conda 'bioconda::mmseqs2 conda-forge::biopython'
 
     input:
     path log_1F
@@ -318,33 +303,32 @@ process _2_general_alignment {
 
     script:
     """
-    #Etape 2A: Effectuer la recherche MMseqs2
-    mkdir -p " ${db_folder_mmseqs_query}"
+    #Etape 2A: Initialisation de l'alignement MMseqs2
+
+    #Creation de la db orf 
     python "${project_dir}/scripts/STEP_2/STEP2A_create_db_mmseqs.py" "${orf_pred_file_derep}/ORF_pred_derep.final" ${db_folder_mmseqs_query}
+
+    #Combinaisons des fichiers de reference
+    python "${project_dir}/scripts/STEP_2/STEP2A_combine_ref.py" ${ref_folder} ${ref_combined}
 
     #log
     echo "log_2A: creation db query mmseqs : terminé" > "${log_folder}/log_STEP2"   
-    
+
+
     #Etape 2B: Effectuer la recherche MMseqs2
-    mkdir -p "${alignment_temp_folder}"
-    python "${project_dir}/scripts/STEP_2/STEP2B_blast_mmseqs.py" ${db_folder_mmseqs_query} ${ref_folder} ${alignment_folder} ${alignment_temp_folder}
+    python "${project_dir}/scripts/STEP_2/STEP2B_blast_mmseqs.py" ${db_folder_mmseqs_query} ${ref_combined} ${alignment_folder} ${alignment_temp_folder}
 
     #log
     echo "log_2B: alignement general mmseqs : terminé" > "${log_folder}/log_STEP2"    
 
-    #Etape 2C: Extraire les informations
-    mkdir -p ${info_folder_IDS}
-    mkdir -p ${info_folder_ID}
-    mkdir -p ${info_folder_countdup}
-    python "${project_dir}/scripts/STEP_2/STEP2C_extract_info.py" ${alignment_folder} ${info_folder}
-    python "${project_dir}/scripts/STEP_2/STEP2C_countduplicate.py" ${info_folder_IDS} ${info_folder_countdup}
+    #Etape 2C: Extraction informations alignement 
+    python "${project_dir}/scripts/STEP_2/STEP2C_process_alignment.py" ${alignment_folder} ${alignment_filt} ${alignment_filt_marker} ${contigs_duplicated} ${orf_ids}
 
     #log
     echo "log_2C: extraction des informations : terminé" >> "${log_folder}/log_STEP2"
 
     #Etape 2D: Extraire les séquences FASTA à partir des identifiants
-    mkdir -p ${orf_codants_folder}
-    python "${project_dir}/scripts/STEP_2/STEP2D_extractfastafromID.py" ${orf_pred_file_derep} ${info_folder_ID}  ${orf_codants_folder}
+    python "${project_dir}/scripts/STEP_2/STEP2D_extractfastafromID.py" "${orf_pred_file_derep}/ORF_pred_derep.final" ${orf_ids}  ${orf_codants_final}
 
     #log
     echo "log_2D: extraction des seqs fasta : terminé" >> "${log_folder}/log_STEP2"
@@ -361,7 +345,8 @@ process _2_general_alignment {
 
 //Etape 3:
 process _3_DNApolthrim {
-    conda 'bioconda::mmseqs2'
+    conda 'bioconda::mmseqs2 conda-forge::pandas conda-forge::biopython'
+
 
     input:
     path log_2
@@ -375,94 +360,31 @@ process _3_DNApolthrim {
     #Renomer dans un nouveau dossier par virus et par bacteria
     #Création des db references de virus et bactéries
     mkdir -p "${DNA_pol_fasta}"
-    python "${project_dir}/scripts/STEP_3/STEP3A_DNA_pol_init.py" ${bact_DNA_pol} ${ref_folder}/dnapol.prt ${DNA_pol_fasta}
-    echo "log_3A: STEP3_DNA_pol_init : terminé" > "${log_folder}/log_STEP3"    
+    python "${project_dir}/scripts/STEP_3/STEP3A_DNA_pol_init.py" ${bact_DNA_pol} "${ref_folder}/dnapol.fasta" ${DNA_pol_fasta}
+    #echo "log_3A: STEP3_DNA_pol_init : terminé" > "${log_folder}/log_STEP3"    
     
     #Etape 3B:Construction DB par mmseqs
     python "${project_dir}/scripts/STEP_3/STEP3B_create_db_mmseqs.py" ${DNA_pol_fasta} ${DNA_pol_fasta_db}
     echo "log_3B: Construction DB par mmseqs : terminé" >> "${log_folder}/log_STEP3"
  
     #Etape 3C: Alignement DB avec les ORF pred  
-    python "${project_dir}/scripts/STEP_3/STEP3C_filter_file.py" ${orf_codants_folder} ${DNA_pol_files}
-    
+    python "${project_dir}/scripts/STEP_3/STEP3C_filter_file.py" ${orf_codants_final} ${DNA_pol_files}
+    echo "log_3C: Alignement DB avec les ORF pred : terminé" >> "${log_folder}/log_STEP3"    
+
     #Etape 3D : blast 
     python "${project_dir}/scripts/STEP_3/STEP3D_blast_mmseqs.py" ${DNA_pol_fasta_db} ${DNA_pol_files} ${DNA_pol_align} ${DNA_pol_align_temp}
-    echo "log_3C: Alignement DB avec les ORF pred : terminé" >> "${log_folder}/log_STEP3"
+    echo "log_3D: blast : terminé" >> "${log_folder}/log_STEP3"
 
     #Etape 3E: receuil des infos
     python "${project_dir}/scripts/STEP_3/STEP3E_DNA_pol_filt.py" ${DNA_pol_align} ${DNA_pol_align_alnfilt} ${DNA_pol_align_alnfilt_ID}
     echo "log_3E: receuil des infos : terminé" >> "${log_folder}/log_STEP3"
 
     #Etape 3F: recuperation des fastas
-    python "${project_dir}/scripts/STEP_3/STEP3F_extractfastafromID.py" ${orf_pred_file_derep} ${DNA_pol_align_alnfilt_ID} ${DNA_pol_align_seqfilt}
+    python "${project_dir}/scripts/STEP_3/STEP3F_extractfastafromID.py" "${orf_codants_final}/dnapol.fasta" ${DNA_pol_align_alnfilt_ID} ${orf_codants_final}
     echo "log_3F: recuperation des fastas : terminé" >> "${log_folder}/log_STEP3"
-        
-    #Etape 3G: recuperation des fastas
-    python "${project_dir}/scripts/STEP_3/STEP3G_dna_pol_filt_aln.py" ${db_folder_mmseqs_ref}/dnapol ${DNA_pol_align_seqfilt} ${DNA_pol_align_final_aln} ${DNA_pol_align_final_aln_temp}
-    echo "log_3G: alignement final avec sequences filtree : termine" >> "${log_folder}/log_STEP3"
 
     #log
     echo "log_3" > log_3 
     """
 }
 
-
-//Etape 4: Polinto-like decision
-process _4_polinto_thrim {
-    conda 'bioconda::mmseqs2'
-
-    input:
-    path log_3
-
-    output:
-    path 'log_4'
-    
-    script:
-    """
-    # Etape 4A: Init des db 
-    python "${project_dir}/scripts/STEP_4/STEP4A_combine_polinto_ref.py" ${ref_folder} ${polinto_fasta}
-    echo "log_4: recuperation des fastas : terminé" > "${log_folder}/log_STEP4"
-    
-    # Etape 4B: Creation des db 
-    python "${project_dir}/scripts/STEP_4/STEP4B_create_db.py" ${polinto_fasta} ${polinto_db}
-    echo "log_4: creation des db : terminé" >> "${log_folder}/log_STEP4"
-
-    # Etape 4C: rassembler les ORF polinto  
-    python "${project_dir}/scripts/STEP_4/STEP4C_collect_orf.py" ${orf_codants_folder} ${polinto_orf_init}
-    echo "log_4: rassembler les orf initiaux : terminé" >> "${log_folder}/log_STEP4"
-
-    # Etape 4D: Blast des orf contre les db
-    python "${project_dir}/scripts/STEP_4/STEP4D_blast_mmseqs.py" ${polinto_db} ${polinto_orf_init} ${polinto_aln} ${polinto_aln_temp}
-    echo "log_4: rassembler les orf initiaux : terminé" >> "${log_folder}/log_STEP4"
-
-    # Etape 4E: Filtration selon les aln 
-    python "${project_dir}/scripts/STEP_4/STEP4E_collect_aln_res.py" ${polinto_aln} ${polinto_orf_init} ${polinto_aln_filt} ${polinto_aln_filt_id} ${polinto_orf_final}
-    echo "log_4: Filtration selon les aln : terminé" >> "${log_folder}/log_STEP4"
-
-    # Etape 4F: Alignement des orf finaux
-    python "${project_dir}/scripts/STEP_4/STEP4F_final_alignment.py" ${polinto_db} ${polinto_orf_final} ${polinto_aln_final} ${polinto_aln_final_temp}                                                                 
-    echo "log_4: creation des db : terminé" >> "${log_folder}/log_STEP4"
-    
-    #log 
-    echo "log_4" > log_4 
-    """
-}
-
-// Extraction des résultats de Miniprot
-process _5_final_treatment {
-    input:
-    path log_4
-
-    output:
-    path 'log_5'
-
-    script:
-    """
-    #Extraction des résultats miniprot
-    python "${project_dir}/scripts/STEP_5/STEP5_final_treatment_orf.py" ${orf_codants_final} ${alignment_final} ${alignment_folder} ${orf_codants_folder} ${DNA_pol_align_final_aln} ${DNA_pol_align_seqfilt} ${polinto_orf_final} ${polinto_aln_final}
-    echo "log_5: Extraction des résultats généraux terminée" > "${log_folder}/log_STEP5"
-
-    #log
-    echo "log_5" > log_5
-    """
-}

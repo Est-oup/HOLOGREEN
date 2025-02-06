@@ -8,20 +8,19 @@ def calculate_min_sequence_lengths(input_folder, output_file):
 
     for root, dirs, files in os.walk(input_folder):
         for file in files:
-            if file.endswith(".prt"):
-                file_path = os.path.join(root, file)
-                min_length = float('inf')
-                for record in SeqIO.parse(file_path, "fasta"):
-                    seq_length = len(record.seq)
-                    if seq_length < min_length:
-                        min_length = seq_length
+            file_path = os.path.join(root, file)
+            min_length = float('inf')
+            for record in SeqIO.parse(file_path, "fasta"):
+                seq_length = len(record.seq)
+                if seq_length < min_length:
+                    min_length = seq_length
                 
-                protein_name = os.path.splitext(file)[0]
-                data.append({
-                    "Protein": protein_name,
-                    "Min_Length": min_length,
-                    "0.75_Min_Length": 0.75 * min_length
-                })
+            protein_name = os.path.splitext(file)[0]
+            data.append({
+                "Protein": protein_name,
+                "Min_Length": min_length,
+                "0.75_Min_Length": 0.75 * min_length
+            })
     
     # Create output directory if it doesn't exist
     output_dir = os.path.dirname(output_file)

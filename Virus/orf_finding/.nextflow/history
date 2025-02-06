@@ -1,4 +1,0 @@
-2024-06-25 23:19:46	7h 43m 2s	wise_pesquet	OK	e1aee385867e0ade0f54e8177ca1a52f	46ce7aee-aafd-4d9d-9367-1cdb87c0c1bd	nextflow run general_workflow.nf
-2024-06-26 09:32:29	51.5s	golden_leibniz	ERR	3e9a2024c381ea8dc063fe83738928b4	46ce7aee-aafd-4d9d-9367-1cdb87c0c1bd	nextflow run general_workflow.nf -resume
-2024-06-26 09:35:24	48.5s	fervent_ritchie	ERR	3e9a2024c381ea8dc063fe83738928b4	46ce7aee-aafd-4d9d-9367-1cdb87c0c1bd	nextflow run general_workflow.nf -resume
-2024-06-26 09:39:06	14m 52s	serene_neumann	OK	3e9a2024c381ea8dc063fe83738928b4	46ce7aee-aafd-4d9d-9367-1cdb87c0c1bd	nextflow run general_workflow.nf -resume
