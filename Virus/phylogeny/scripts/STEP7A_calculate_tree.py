@@ -12,7 +12,7 @@ def build_tree(aligned_file, output_folder):
         os.makedirs(tree_output_dir)
     
     # Commande IQ-TREE avec les options et le préfixe de sortie dans le sous-dossier
-    iqtree_cmd = f"iqtree2 -s {aligned_file} -m MFP -msub viral -B 1000 -nt AUTO -pre {os.path.join(tree_output_dir, file_basename)}"
+    iqtree_cmd = f"iqtree2 -s {aligned_file} -m MFP -B 1000 -nt AUTO -pre {os.path.join(tree_output_dir, file_basename)}"
 
     try:
         # Exécution de la commande IQ-TREE

@@ -68,16 +68,16 @@ log_folder = "${project_dir}/logs"
 
 
 workflow {
-    //ETAPE 1 : Alignement général 
+    //ETAPE 1 : General alignement
     log_1 = _1_general_alignment()
 
     //ETAPE 2 : Filtration of ORF alignments based on evalue et reference score
     log_2 = _2_filter_eval_refbounds(log_1)
 
-    // ETAPE 3 : Filtration by size and clustering
+    // ETAPE 3 : Filtration by size
     log_3 = _3_size_filter(log_2)
 
-    // ETAPE 4 : Remove duplicated ORF within contigs
+    // ETAPE 4 : Remove duplicated ORF within bins
     log_4 = _4_dup_remove(log_3)
     
     // ETAPE 4 : Analysis of filtration 
